@@ -3,15 +3,84 @@
 # desc
 #
 
-[zookd.c:1612]
-description goes here. for example, the 'buf' variable can be
-overwritten by the 'msg' variable because ...
+[http.c:282]
 
-    <paste offending line(s) of code here>
+Alustetaan merkkitaulukko (merkkijono), jonka pituus on 1024 merkkiä.
+276: char pn[1024];
 
-[http.c:1512]
-another description.
+Muuttujaan pn tallennetaan työkansion polku.
+279: getcwd(pn, sizeof(pn));
 
-    <paste offending line(s) of code here>
+Muuttujaan pn lisätään http_serve():lle parametrina annettu muuttuja name, joka
+on halutun resurssin nimi (HTTP-otsikko REQUEST_URI). Sillä strcat on muistin-
+käytön kannalta vaarallinen funktio, on pinon ylivuototilanne nyt mahdollinen.
+282: strcat(pn, name);
 
-# many more come here
+Normaalisti selainten osoitteiden maksimipituus on noin 2000 merkkiä, joten
+pn:n 1024 merkkiä voi tulla helposti täyteen.
+
+Terminator canaryt pysäyttävät ylivuotohyökkäykset, sillä funktio ei voi kirjoittaa mitään
+nollamerkkien jälkeen. Random canaryt tietyissä tapauksissa kiertää rakentamalla syöte oikein.
+
+[http.c:165]
+
+Alustetaan merkkitaulukko (merkkijono), jonka pituus on 512 merkkiä.
+121: char envvar[512];
+
+Asetetaan muuttujaan envvar formatoitu merkkijono. sprintf() on muistinkäytön kannalta
+vaarallinen funktio, joten mikäli buf on pituudeltaan yli 512 merkkiä, tapahtuu muistin 
+ylivuoto. Muuttujassa buf on tällöin HTTP-pyynnön yksittäinen rivi, joka luetaan funktiossa
+http_read_line().
+
+Tähän tilanteeseen päästään vain mikäli buf != "CONTENT_TYPE" tai "CONTENT_LENTGH".
+165: sprintf(envvar, "HTTP_%s", buf);
+
+Terminator canaryt pysäyttävät ylivuotohyökkäykset, sillä funktio ei voi kirjoittaa mitään
+nollamerkkien jälkeen. Random canaryt tietyissä tapauksissa kiertää rakentamalla syöte oikein.
+
+[http.c:105]
+
+Alustetaan merkkitaulukko (merkkijono), jonka pituus on 2048 merkkiä.
+(zookd.c) 65: char reqpath[2048];
+
+Annetaan merkkijono parametrina funktiolle http_request_line().
+(zookd.c) 70: if ((errmsg = http_request_line(fd, reqpath, env, &env_len)))
+
+sp1-osoittimesta alkava merkkijono (http-pyynnön osoite) dekoodataan reqpath:iin.
+Dekoodaus ei lopu ennen kuin osoite loppuu, joten muistin ylivuototilanne on mahdollinen. 
+105: url_decode(reqpath, sp1);
+
+Sillä url-decode() ei käytä valmiita, haavoittuvaisia funktioita, voidaan canaryt tietyissä tapauksissa kiertää
+rakentamalla syöte oikein.
+
+[http.c:166]
+
+Alustetaan merkkitaulukko (merkkijono), jonka pituus on 512 merkkiä.
+120: char value[512];
+
+value-muuttujaan kirjoitetaan sp-osoittimesta alkava HTTP-pyynnön rivin arvo.
+Sillä url_decode ei pysähdy ennen kuin arvon merkkijono loppuu, voidaan tässä tilanteessa
+kirjoittaa value-muuttujalle varatun muistialueen ulkopuolelle.
+159: url_decode(value, sp);
+
+Sillä url_decode() ei käytä valmiita, haavoittuvaisia funktioita, voidaan canaryt tietyissä tapauksissa kiertää
+rakentamalla syöte oikein.
+
+Joko rivillä 166 asetetaan muuttujaan envvar johtain ylivuotoon.
+166: setenv(envvar, value, 1);
+
+[http.c:397]
+
+Alustetaan merkkitaulukko (merkkijono), jonka pituus on 1024 merkkiä.
+Huomionarvoista on, että buf-nimiset merkkijonot on muutoin alustettu staattisina, ja
+kommenttiin lisätty huomautus siitä etteivät staattiset muuttujat ole pinossa.
+375: char buf[1024]
+
+http_read_line() lukee soketista merkki kerrallaan ja kirjoittaa sen buf-muuttujaan, päättyen 
+mahdollisiin rivin lopetuksiin. Metodi kuitenkin jatkaa suoritusta mikäli se kohtaa merkin '/r',
+jolloin on mahdollista kirjoittaa varatus muistialueen yli. Tällöin tosin ainut muistialueen yli kirjoitettava
+merkki on '/0'.
+397: if (http_read_line(pipefd[0], buf, 1024) < 0) {
+
+Terminator canary ei tällöin estäisi tätä hyökkäystä, mutta satunnainen canary estäisi.
+

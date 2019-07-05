@@ -62,12 +62,13 @@ static void process_client(int fd)
 {
     static char env[8192];  /* static variables are not on the stack */
     static size_t env_len;
-    char reqpath[2048];
+    size_t reqpath_len = 2048;
+    char reqpath[reqpath_len];
     const char *errmsg;
     int i;
 
     /* get the request line */
-    if ((errmsg = http_request_line(fd, reqpath, env, &env_len)))
+    if ((errmsg = http_request_line(fd, reqpath, env, &env_len, &reqpath_len)))
         return http_err(fd, 500, "http_request_line: %s", errmsg);
 
     for (i = 0; i < nsvcs; ++i)

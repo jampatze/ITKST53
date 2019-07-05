@@ -37,6 +37,12 @@ int http_read_line(int fd, char *buf, size_t size)
         if (cc <= 0)
             break;
 
+        /* Lopetusehto nostettu toiseksi ylivuotojen estämiseksi */
+        if (i >= size - 1)
+        {
+            buf[i] = '\0';
+            return 0;
+        }
         if (buf[i] == '\r')
         {
             buf[i] = '\0';      /* skip */
@@ -49,19 +55,13 @@ int http_read_line(int fd, char *buf, size_t size)
             return 0;
         }
 
-        if (i >= size - 1)
-        {
-            buf[i] = '\0';
-            return 0;
-        }
-
         i++;
     }
 
     return -1;
 }
 
-const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len)
+const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len, size_t *reqpath_len)
 {
     static char buf[8192];      /* static variables are not on the stack */
     char *sp1, *sp2, *qp, *envp = env;
@@ -102,7 +102,7 @@ const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len)
     }
 
     /* decode URL escape sequences in the requested path into reqpath */
-    url_decode(reqpath, sp1);
+    url_decode(reqpath, sp1, reqpath_len);
 
     envp += sprintf(envp, "REQUEST_URI=%s", reqpath) + 1;
 
@@ -117,8 +117,9 @@ const char *http_request_headers(int fd)
 {
     static char buf[8192];      /* static variables are not on the stack */
     int i;
-    char value[512];
-    char envvar[512];
+    size_t valueSize = 512;
+    char value[valueSize];
+    char envvar[valueSize];
 
     /* For lab 2: don't remove this line. */
     touch("http_request_headers");
@@ -156,13 +157,14 @@ const char *http_request_headers(int fd)
         }
 
         /* Decode URL escape sequences in the value */
-        url_decode(value, sp);
+        url_decode(value, sp, &valueSize);
 
         /* Store header in env. variable for application code */
         /* Some special headers don't use the HTTP_ prefix. */
         if (strcmp(buf, "CONTENT_TYPE") != 0 &&
             strcmp(buf, "CONTENT_LENGTH") != 0) {
-            sprintf(envvar, "HTTP_%s", buf);
+            /* Vaihdettu sprintf turvalliuseen snprintf-funktioon */
+            snprintf(envvar, valueSize, "HTTP_%s", buf);
             setenv(envvar, value, 1);
         } else {
             setenv(buf, value, 1);
@@ -273,13 +275,15 @@ valid_cgi_script(struct stat *st)
 void http_serve(int fd, const char *name)
 {
     void (*handler)(int, const char *) = http_serve_none;
-    char pn[1024];
+    size_t pnSize = 1024;
+    char pn[pnSize];
     struct stat st;
 
     getcwd(pn, sizeof(pn));
     setenv("DOCUMENT_ROOT", pn, 1);
 
-    strcat(pn, name);
+    /* Vaihdettu strcat turvalliseen strncat-funktioon */
+    strncat(pn, name, pnSize);
     split_path(pn);
 
     if (!stat(pn, &st))
@@ -434,9 +438,10 @@ void http_serve_executable(int fd, const char *pn)
     }
 }
 
-void url_decode(char *dst, const char *src)
+// For-looppia muokattu ylivuotojen estämiseksi
+void url_decode(char *dst, const char *src, size_t *size)
 {
-    for (;;)
+    for (int i = 0; i < *size; i++)
     {
         if (src[0] == '%' && src[1] && src[2])
         {
