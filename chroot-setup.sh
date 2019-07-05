@@ -70,3 +70,6 @@ rm -rf /jail/zoobar/db
 python /jail/zoobar/zoodb.py init-person
 python /jail/zoobar/zoodb.py init-transfer
 
+# Annetaan zookfs:lle oikeus tietokantaan
+chown -R 10001:10001 /jail/zoobar/db
+chmod 770 /jail/zoobar/db

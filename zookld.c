@@ -172,6 +172,27 @@ pid_t launch_svc(CONF *conf, const char *name)
 	chroot(dir);
     }
 
+    if (NCONF_get_number_e(conf, name, "uid", &uid))
+    {
+        /* Vaihda zook.conf:ssa määritelty uid */
+        setresuid(uid,uid,uid);
+    }
+
+    if (NCONF_get_number_e(conf, name, "gid", &gid))
+    {
+        /* Vaihda zook.conf:ssa määritelty gid */
+        setresgid(gid,gid,gid);
+    }
+
+    if ((groups = NCONF_get_string(conf, name, "extra_gids")))
+    {
+        ngids = 0;
+        CONF_parse_list(groups, ',', 1, &group_parse_cb, NULL);
+        /* Vaihda zook.confi:ssa määritellyt extra gui:t */
+        for (i = 0; i < ngids; i++)
+		setgroups(ngids, gids);
+    }
+
     signal(SIGCHLD, SIG_DFL);
     signal(SIGPIPE, SIG_DFL);
 
