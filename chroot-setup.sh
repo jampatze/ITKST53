@@ -70,6 +70,16 @@ rm -rf /jail/zoobar/db
 python /jail/zoobar/zoodb.py init-person
 python /jail/zoobar/zoodb.py init-transfer
 
-# Annetaan zookfs:lle oikeus tietokantaan
-chown -R 10001:10001 /jail/zoobar/db
-chmod 770 /jail/zoobar/db
+# Asetetaan staattiselle palvelulle media- ja template-kansioiden omistajuus
+chown -R 10001:10001 /jail/zoobar/media
+chown -R 10001:10001 /jail/zoobar/templates
+
+# Asetetaan dynaamiselle palvelulle omistajuus tietokantaan sekä tietokannan käyttöoikeudet
+set_perms 10002:10002 755 /jail/zoobar/db
+set_perms 10002:10002 755 /jail/zoobar/db/person/
+set_perms 10002:10002 644 /jail/zoobar/db/person/person.db
+set_perms 10002:10002 755 /jail/zoobar/db/transfer/
+set_perms 10002:10002 644 /jail/zoobar/db/transfer/transfer.db
+
+#Asetetaan dynaamiselle palvelulle oikeus index.cgi:hin
+set_perms 10002:0 700 /jail/zoobar/index.cgi
