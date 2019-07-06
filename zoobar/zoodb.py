@@ -27,6 +27,7 @@ class Cred(CredBase):
     username = Column(String(128), primary_key=True)
     password = Column(String(128))
     token = Column(String(128))
+    salt = Column(String(128))
 
 def dbsetup(name, base):
     thisdir = os.path.dirname(os.path.abspath(__file__))

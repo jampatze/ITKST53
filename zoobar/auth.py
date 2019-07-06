@@ -3,6 +3,8 @@ from debug import *
 
 import hashlib
 import random
+from pbkdf2 import PBKDF2
+import os
 
 def newtoken(db, cred):
     hashinput = "%s%.10f" % (cred.password, random.random())
@@ -15,11 +17,12 @@ def login(username, password):
     cred = db.query(Cred).get(username)
     if not cred:
         return None
-    if cred.password == password:
+    salt = (cred.salt).decode("hex")
+    if PBKDF2(password, salt).hexread(32) == cred.password:
         return newtoken(db, cred)
     else:
         return None
-
+    
 def register(username, password):
     db_person = person_setup()
     db_cred = cred_setup()
@@ -32,7 +35,9 @@ def register(username, password):
 
     newcred = Cred()
     newcred.username = username
-    newcred.password = password
+    salt = os.urandom(8)
+    newcred.password = PBKDF2(password, salt).hexread(32)
+    newcred.salt = salt.encode("hex")
 
     db_person.add(newperson)
     db_person.commit()
