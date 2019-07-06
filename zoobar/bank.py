@@ -4,23 +4,23 @@ from debug import *
 import time
 
 def transfer(sender, recipient, zoobars):
-    persondb = person_setup()
-    senderp = persondb.query(Person).get(sender)
-    recipientp = persondb.query(Person).get(recipient)
+    bankdb = bank_setup()
+    sender = bankdb.query(Bank).get(sender)
+    recipient = bankdb.query(Bank).get(recipient)
 
-    sender_balance = senderp.zoobars - zoobars
-    recipient_balance = recipientp.zoobars + zoobars
+    sender_balance = sender.zoobars - zoobars
+    recipient_balance = recipient.zoobars + zoobars
 
     if sender_balance < 0 or recipient_balance < 0:
         raise ValueError()
 
-    senderp.zoobars = sender_balance
-    recipientp.zoobars = recipient_balance
-    persondb.commit()
+    sender.zoobars = sender_balance
+    recipient.zoobars = recipient_balance
+    bankdb.commit()
 
     transfer = Transfer()
-    transfer.sender = sender
-    transfer.recipient = recipient
+    transfer.sender = sender.username
+    transfer.recipient = recipient.username
     transfer.amount = zoobars
     transfer.time = time.asctime()
 
@@ -29,12 +29,17 @@ def transfer(sender, recipient, zoobars):
     transferdb.commit()
 
 def balance(username):
-    db = person_setup()
-    person = db.query(Person).get(username)
-    return person.zoobars
+    db = bank_setup()
+    bank = db.query(Bank).get(username)
+    return bank.zoobars
 
 def get_log(username):
     db = transfer_setup()
-    return db.query(Transfer).filter(or_(Transfer.sender==username,
-                                         Transfer.recipient==username))
+    return db.query(Transfer).filter(or_(Transfer.sender==username, Transfer.recipient==username))
 
+def newAccount(username):
+    db = bank_setup()
+    bank = Bank()
+    bank.username = username
+    db.add(bank)
+    db.commit()
