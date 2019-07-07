@@ -9,6 +9,7 @@ import hashlib
 import socket
 import bank_client
 import zoodb
+import re
 
 from debug import *
 
@@ -23,6 +24,10 @@ class ProfileAPIServer(rpclib.RpcServer):
         creddb = zoodb.cred_setup()
         cred = creddb.query(zoodb.Cred).get(self.user)
         self.token = cred.token
+        
+        os.setgid(10002)
+        os.setuid(10006)
+
 
     def rpc_get_self(self):
         return self.user
@@ -54,7 +59,13 @@ class ProfileServer(rpclib.RpcServer):
     def rpc_run(self, pcode, user, visitor):
         uid = 10005
 
-        userdir = '/tmp'
+        user = re.sub(r'\W+', '0', user)
+        userdir = '/tmp/' + user
+
+        if not os.path.exists(userdir):
+            os.makedirs(userdir)
+        
+        os.chown(userdir, uid, uid)
 
         (sa, sb) = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM, 0)
         pid = os.fork()
