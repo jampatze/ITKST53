@@ -700,30 +700,45 @@ def concolic_test(testfunc, maxiter = 100, verbose = 0):
     ## Here's a possible plan of attack:
     ##
     ## - Iterate over the set of branches in cur_path_constr.
-    ##
+    
+    branches = []
+    for (branch, caller) in zip(cur_path_constr, cur_path_constr_callers):
+    
     ## - Compute an AST expression for the constraints necessary
     ##   to go the other way on that branch.  You can use existing
     ##   logical AST combinators like sym_not(), sym_and(), etc.
-    ##
     ##   Note that some of the AST combinators take separate positional
     ##   arguments. In Python, to unpack a list into separate positional
     ##   arguments, use the '*' operator documented at
     ##   https://docs.python.org/2/tutorial/controlflow.html#unpacking-argument-lists
-    ##
+        
+        if not branches:
+            upward = sym_not(branch)
+            branches = branch
+        else:
+            upward = sym_and(branches, sym_not(branch))
+            branches = sym_and(branches, branch)
+
     ## - If this constraint is already in the "checked" set, skip
     ##   it (otherwise, add it to prevent further duplicates).
-    ##
+
+        if not branch in checked:
+            checked.add(upward)
+        else:
+            continue
+
     ## - Invoke Z3, along the lines of:
-    ##
-    ##     (ok, model) = fork_and_check(constr)
-    ##
+
+        (ok, model) = fork_and_check(upward)
+
     ## - If Z3 was able to find example inputs that go the other
     ##   way on this branch, make a new input set containing the
     ##   values from Z3's model, and add it to the set of inputs
     ##   to consider:
     ##
-    ##     inputs.add(new_values, caller)
-    ##
+        if ok == z3.sat:
+            inputs.add(model, caller)
+
     ##   where caller is the corresponding value from the list
     ##   of call sites (cur_path_constr_callers).
     ##
