@@ -730,7 +730,7 @@ def concolic_test(testfunc, maxiter = 100, verbose = 0):
     ## - If this constraint is already in the "checked" set, skip
     ##   it (otherwise, add it to prevent further duplicates).
 
-        if not branch in checked:
+        if not upward in checked:
             checked.add(upward)
         else:
             continue
