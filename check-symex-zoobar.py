@@ -80,8 +80,17 @@ def test_stuff():
   ## Detect balance mismatch.
   ## When detected, call report_balance_mismatch()
 
+  balance2 = sum([p.zoobars for p in pdb.query(zoobar.zoodb.Person).all()])
+  if balance1 != balance2:
+    report_balance_mismatch()
+
   ## Detect zoobar theft.
   ## When detected, call report_zoobar_theft()
+
+  for u in pdb.query(zoobar.zoodb.Person).all():
+    if p.username + '#' + p.token not in environ['HTTP_COOKIE'] and p.zoobars < 10:
+      report_zoobar_theft()
+
 
 fuzzy.concolic_test(test_stuff, maxiter=2000, verbose=1)
 
