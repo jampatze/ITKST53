@@ -1,0 +1,5 @@
+Arvosteluksi ehdotan 3,5p, sillä tein kaikki tehtävät ja kaikki (pakolliset)
+testit menevät läpi.
+
+Void ajaa testit itse kloonaamalla reporsition https://github.com/jampatze/ITKST53.git
+ja vaihtamalla haaraan lab3.
