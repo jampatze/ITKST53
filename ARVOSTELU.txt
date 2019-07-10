@@ -1,0 +1,10 @@
+En saanut tehtävien tarkistusskriptiä toimimaan, sillä phantomjs:n latauksen kanssa oli jotain ongelmaa.
+Voit kuitenkin tarkistaa tehtävät käsin.
+
+Tehtävä 1 huom!
+
+Tässä enkoodamaton versio injektiomerkkijonosta:
+"style size=10><script>alert(document.cookie);</script><style>.warning{display:none}</style></
+
+Tehtävässä ei käytetä kurssimateriaalissa olevaa sähköpostiskriptiä, mutta XSS toimii ja käyttäjän kekseillä
+voi todistetusti varastaa.
