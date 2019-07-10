@@ -1,10 +1,9 @@
-En saanut tehtävien tarkistusskriptiä toimimaan, sillä phantomjs:n latauksen kanssa oli jotain ongelmaa.
-Voit kuitenkin tarkistaa tehtävät käsin.
+Tehtävät kannattaa tarkistaa käsin, sillä en saanut niitä toimimaan tarkistussriptin kanssa.
 
-Tehtävä 1 huom!
+***Tehtävä 1 huom!***
 
 Tässä enkoodamaton versio injektiomerkkijonosta:
 "style size=10><script>alert(document.cookie);</script><style>.warning{display:none}</style></
 
-Tehtävässä ei käytetä kurssimateriaalissa olevaa sähköpostiskriptiä, mutta XSS toimii ja käyttäjän kekseillä
+Tehtävässä ei käytetä kurssimateriaalissa olevaa sähköpostiskriptiä, mutta XSS toimii ja käyttäjän keksin
 voi todistetusti varastaa.
