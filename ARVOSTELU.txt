@@ -1,0 +1,4 @@
+Tein koko harjoituksen, ja tarkistusskriptit menivät läpi, 3,5p.
+
+Void ajaa testit itse kloonaamalla reporsition https://github.com/jampatze/ITKST53-Lab1.git
+ja vaihtamalla haaraan lab1.
