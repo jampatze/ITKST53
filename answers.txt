@@ -1,1 +1,50 @@
-## Place your answers here.
+*** TEHTÄVÄ 2 ***
+
+exploit-2a.py
+
+Ensimmäinen exploit hyödyntää http.c:n rivillä 282 käyettävää
+srtncat()-funktiota, joka ei tarkista työkansion nimen (pn)
+perään lisättävän resurssin (name) pituutta. Tällöin handlerin luonti
+rivillä 296 kaataa ohjelman seqmentation faulttiin.
+
+name-muuttujan saa syötettyä HTTP-pyynnössä haettavan resurssin nimessä.
+
+exploit-2b.py
+
+Toinen exploit hyödyntää http.c:ssä rivillä 159 kutsuttavaa url_decode()-funktiota,
+joka ei lopeta kirjoittamista ennen kuin parametrina annettua (sp) osoitinta seuraava
+merkkijono loppuu. Tästä ei näytä seuraavan kovaa kaatumista, mutta kurssin
+testiskripti hyväksyy vastauksen.
+
+*** TEHTÄVÄ 3 ***
+
+Uskon, että kaikkia tehtävässä 1 löydettyjä haavoittuvuuksia 1-4 voidaan käyttää
+tehtävän 3 vaatimalla tavalla poistamaan tiedostojen linkkejä.
+
+Haavoittuvuuksissa 1-4 luodaan vähintään 512 merkin pituinen merkkitaulukko,
+joka riittää tehätävssä tehdyn shellcoden toimittamiseen. Ensimmäinen ja neljäs
+haavoittuvuus on todistettu toimivaksi. Kolmas haavoittuvuus käyttää myös 
+url_decode()-funktiota. Neljäs käyttää sprintf()-funktiota, johon asetetaan
+buf-muuttuja formatiotuna (HTTP-pyynnön rivin avain).
+
+Viidennessä haavoittuvuudessa on mahdollista kirjoittaa muistialueen ulkopuolelle vain
+rivinvaihtomerkkejä, joten se ei sovellu tehtävässä käytettyyn hyökkäykseen.
+
+*** TEHTÄVÄ 4 ***
+
+Kuten yllä mainittiin, voi löydetyssä haavoittuvuuksissa 1-4 kirjoittaa muistiin
+mielivaltaisesti. Silloin hyökkäykset 1-4 soveltuvat myöskin return-to-libc -hyökkäyksiin.
+
+*** TEHTÄVÄ 5 ***
+
+Kirjautumisvaiheessa käyttäjän salasana lähetetään palvelimelle ilman minkäänlaista salausta. Tällöin
+salasanat ovat helposti kaapattavissa verkkoliikenteestä ja hyökkääjällä pääsee autentikoitumaan
+palveluun. Ratkaisuna olisi vaihtaa käytetty, salaamaton HTTP-protokolla salattuun HTTPS-protokollaan.
+
+Kirjautumisyrityksiä ei myöskään rajoiteta: tälläin salasanojen brute force-murrot ovat mahdollisia.
+Tätä testattiin 1001-salasanaisella listalla, jossa viimeinen salasana oli oikea. Tämä altistaa
+palvelun sekä salasanan murtoyrityksille, että DOS-hyökkäyksille. Ratkaisuna olisi estää uudet yhteydet 
+ip-osoitteesta mikäli yhteyksien määrä ylittää jonkin raja-arvon annetussa ajassa. Tämän voi toteuttaa
+joko itse palvelussa tai virtuaalikoneen palomuurissa.
+
+hydra -l jami -p ps.txt -s 8080 localhost http-post-form "/zoobar/index.cgi/login:login_username=^USER^&login_password=^PASS^&submit_login=Log+in&nexturl=%2Fzoobar%2Findex.cgi%2F:S=Zoobar" -vV -F
