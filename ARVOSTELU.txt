@@ -1,9 +1,4 @@
 Tehtävät kannattaa tarkistaa käsin, sillä en saanut niitä toimimaan tarkistussriptin kanssa.
 
-***Tehtävä 1 huom!***
-
-Tässä enkoodamaton versio injektiomerkkijonosta:
-"style size=10><script>alert(document.cookie);</script><style>.warning{display:none}</style></
-
-Tehtävässä ei käytetä kurssimateriaalissa olevaa sähköpostiskriptiä, mutta XSS toimii ja käyttäjän keksin
-voi todistetusti varastaa.
+Tehtävissä 1 ja 3 ei käytetä kurssimateriaalissa olevaa sähköpostiskriptiä, mutta kysyt tiedot
+alertataan sen sijasta.
