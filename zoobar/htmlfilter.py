@@ -14,9 +14,44 @@ libcode = '''
             return {
                 get onclick() { return e.onclick; },
                 set onclick(h) { e.onclick = h; },
+                // Extend textContent
+                get textContent() { return e.textContent },
+                set textContent(c) { e.textContent = c; },
             }
         },
     };
+
+    // Extend setTimeout()
+    function sandbox_setTimeout(f, s){
+        if (typeof(f) == "function"){
+            setTimeout(f, s);
+        }
+    }
+
+    // Check for dangerous attributes in brackets
+    function bracket_check(s){
+        if (s === "__proto__" || s === "constructor" || s === "__defineGetter__" || s === "__defineSetter__"){
+            return '__invalid__';
+        } else {
+            s.toString = Object.prototype.toString(s);
+            s.valueOf = Object.prototype.valueOf(s);
+            return s;
+        }
+    }
+    
+    // Check that this isn't refering to a global object
+    function this_check(t){
+        if (t === window){
+            return null;
+        } else {
+            return t;
+        }
+    }
+
+    // Override dangerous functions
+    function eval(arg){
+        return "NO!";
+    }
 
     // Do not change these functions.
     function sandbox_grader(url) {

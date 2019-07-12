@@ -1,0 +1,4 @@
+3,5p, sillä tein kaikki tehtävät ja testit menevät läpi.
+
+Voit ajaa testit itse kloonamalla repon https://github.com/jampatze/ITKST53.git ja 
+vaihtamalla haaraan lab6.

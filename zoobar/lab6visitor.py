@@ -66,7 +66,7 @@ class LabVisitor(object):
         return ''.join(output)
 
     def visit_Identifier(self, node):
-        return node.value
+        return 'sandbox_' + node.value
 
     def visit_Assign(self, node):
         # Note: if node.op is ':' this "assignment" is actually a property in
@@ -74,12 +74,14 @@ class LabVisitor(object):
         # is either an ast.Identifier or an ast.String.
         if node.op == ':':
             template = '%s%s %s'
+            left = self.visit(node.left).replace('sandbox_', '')
         else:
             template = '%s %s %s'
+            left = self.visit(node.left)
         if getattr(node, '_parens', False):
             template = '(%s)' % template
         return template % (
-            self.visit(node.left), node.op, self.visit(node.right))
+            left, node.op, self.visit(node.right))
 
     def visit_Number(self, node):
         return node.value
@@ -322,16 +324,25 @@ class LabVisitor(object):
             template = '(%s.%s)'
         else:
             template = '%s.%s'
-        s = template % (self.visit(node.node), self.visit(node.identifier))
+
+        right = self.visit(node.identifier).replace('sandbox_', '')
+
+        dangerous_attributes = ["__proto__","constructor","__defineGetter__","__defineSetter__"]
+
+        for d in dangerous_attributes:
+            if d in right:  
+                right = '__invalid__'
+
+        s = template % (self.visit(node.node), right)
         return s
 
     def visit_BracketAccessor(self, node):
-        s = '%s[%s]' % (self.visit(node.node), self.visit(node.expr))
+        s = '%s[bracket_check(%s)]' % (self.visit(node.node), self.visit(node.expr))
         return s
 
     def visit_FunctionCall(self, node):
-        s = '%s(%s)' % (self.visit(node.identifier),
-                        ', '.join(self.visit(arg) for arg in node.args))
+        s = '%s(%s)' % (self.visit(node.identifier),', '.join(self.visit(arg) for arg in node.args))
+
         return s
 
     def visit_Object(self, node):
@@ -363,5 +374,5 @@ class LabVisitor(object):
         return s
 
     def visit_This(self, node):
-        return 'this'
+        return 'this_check(this)'
 
