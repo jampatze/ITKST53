@@ -1,4 +1,8 @@
+3,5p, sillä tehtävät toimivat kuten pitääkin.
+
 Tehtävät kannattaa tarkistaa käsin, sillä en saanut niitä toimimaan tarkistussriptin kanssa.
+Kannattaa myös tarkistaa, että kannassa on attacker-tili. Ennen palautusta itse testatessani
+huomasin, että tämä tili oli kadonnut kannasta.
 
 Tehtävissä 1 ja 3 ei käytetä kurssimateriaalissa olevaa sähköpostiskriptiä, mutta kysyt tiedot
 alertataan sen sijasta.
